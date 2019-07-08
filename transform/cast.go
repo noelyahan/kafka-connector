@@ -2,10 +2,10 @@ package transforms
 
 import (
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/pickme-go/log"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"mybudget/kafka-connect/connector"
 	"strconv"
 	"strings"
 )
@@ -44,8 +44,8 @@ After: {"ID": "46290","score": 4761.0}
 
 */
 type Cast struct {
-	Type  string // key or key
-	Spec  []CastProps
+	Type string // key or key
+	Spec []CastProps
 }
 
 type CastProps struct {
@@ -96,7 +96,6 @@ func (c Cast) getJSON(value interface{}) interface{} {
 	}
 	return value
 }
-
 
 func (c Cast) cast(castType string, v interface{}) interface{} {
 	var s string

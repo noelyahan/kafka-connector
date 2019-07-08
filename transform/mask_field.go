@@ -2,17 +2,17 @@ package transforms
 
 import (
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/pickme-go/log"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"mybudget/kafka-connect/connector"
 	"reflect"
 	"strings"
 )
 
 // Mask specified fields with a valid null key for the field type (i.e. 0, false, empty string, and so on).
 type MaskField struct {
-	Type string
+	Type   string
 	Fields []string
 }
 
@@ -25,7 +25,7 @@ func (m MaskField) Transform(rec connector.Recode) connector.Recode {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())
 		}
 		return NewRec(key, rec.Value(), rec.Topic(), rec.Partition())
-	}else if strings.Contains(m.Type, "Value") {
+	} else if strings.Contains(m.Type, "Value") {
 		value := m.getJSON(rec.Value())
 		if value == nil {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())
@@ -70,4 +70,3 @@ func (m MaskField) getJSON(value interface{}) interface{} {
 	}
 	return value
 }
-

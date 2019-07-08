@@ -1,6 +1,6 @@
 package kafka_connect
 
-import "mybudget/kafka-connect/connector"
+import "github.com/gmbyapa/kafka-connector/connector"
 
 type RunnerState string
 
@@ -8,21 +8,21 @@ type TaskState string
 
 type RunnerConfig struct {
 	Connector *connector.Config `json:"connector"`
-	State RunnerState `json:"state"`
+	State     RunnerState       `json:"state"`
 }
 
 const (
 	RunnerCreated RunnerState = `CREATED`
 	RunnerRunning RunnerState = `RUNNING`
-	RunnerPause RunnerState = `PAUSED`
+	RunnerPause   RunnerState = `PAUSED`
 	RunnerStopped RunnerState = `STOPPED`
 )
 
 const (
-	TaskRuning TaskState = `RUNNING`
-	TaskPaused TaskState = `PAUSED`
+	TaskRuning  TaskState = `RUNNING`
+	TaskPaused  TaskState = `PAUSED`
 	TaskStopped TaskState = `STOPPED`
-	TaskIdle TaskState = `IDLE`
+	TaskIdle    TaskState = `IDLE`
 )
 
 type Runner interface {

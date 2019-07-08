@@ -2,10 +2,10 @@ package transforms
 
 import (
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/pickme-go/log"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"mybudget/kafka-connect/connector"
 	"strings"
 )
 
@@ -14,12 +14,13 @@ type ReplaceFieldProps struct {
 	NewField string
 }
 type ReplaceField struct {
-	Type string
+	Type            string
 	BlackListFields []string
 	// TODO
 	//WhiteList []string
 	Renames []ReplaceFieldProps
 }
+
 var replaceFieldLogPrefix = `ReplaceField SMT`
 
 func (r ReplaceField) Transform(rec connector.Recode) connector.Recode {
@@ -29,7 +30,7 @@ func (r ReplaceField) Transform(rec connector.Recode) connector.Recode {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())
 		}
 		return NewRec(key, rec.Value(), rec.Topic(), rec.Partition())
-	}else if strings.Contains(r.Type, "Value") {
+	} else if strings.Contains(r.Type, "Value") {
 		value := r.getJSON(rec.Value())
 		if value == nil {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())

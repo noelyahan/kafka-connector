@@ -3,7 +3,7 @@ package transforms
 import (
 	"encoding/json"
 	"fmt"
-	"mybudget/kafka-connect/connector"
+	"github.com/gmbyapa/kafka-connector/connector"
 )
 
 type Transformer interface {
@@ -17,5 +17,5 @@ func isJSON(v interface{}) bool {
 	s := fmt.Sprintf("%v", v)
 	b := []byte(s)
 	err := json.Unmarshal(b, &jsonStr)
-	return  err == nil
+	return err == nil
 }

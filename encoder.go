@@ -3,20 +3,20 @@ package kafka_connect
 import (
 	"errors"
 	"fmt"
-	"mybudget/kafka-connect/connector"
+	"github.com/gmbyapa/kafka-connector/connector"
 )
 
 type encoders struct {
 	list map[string]connector.Encoder
 }
 
-func newConcoders() *encoders  {
+func newConcoders() *encoders {
 	return &encoders{
 		list: make(map[string]connector.Encoder),
 	}
 }
 
-func (enc *encoders) Register(name string, encoder connector.Encoder) error  {
+func (enc *encoders) Register(name string, encoder connector.Encoder) error {
 	if _, ok := enc.list[name]; ok {
 		return errors.New(fmt.Sprintf(`encoder [%s] already registered`, name))
 	}
@@ -25,15 +25,15 @@ func (enc *encoders) Register(name string, encoder connector.Encoder) error  {
 	return nil
 }
 
-func (enc *encoders) List() []string{ panic (`not yet implemented`)}
+func (enc *encoders) List() []string { panic(`not yet implemented`) }
 
-func (enc *encoders) Registered(name string) bool{
+func (enc *encoders) Registered(name string) bool {
 	_, ok := enc.list[name]
 	return ok
 }
 
-func (enc *encoders) Get(name string) (connector.EncoderBuilder, error){
-	encoder , ok := enc.list[name]
+func (enc *encoders) Get(name string) (connector.EncoderBuilder, error) {
+	encoder, ok := enc.list[name]
 	if !ok {
 		return nil, errors.New(fmt.Sprintf(`encoder [%s] does not exist`, name))
 	}

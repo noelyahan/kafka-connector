@@ -2,7 +2,7 @@ package kafka_connect
 
 import (
 	"fmt"
-	"mybudget/kafka-connect/connector"
+	"github.com/gmbyapa/kafka-connector/connector"
 )
 
 func NewConnector(configs *connector.Config) (connector.Connector, error) {
@@ -42,7 +42,7 @@ func (*soiurceConnector) Resume() error {
 }
 
 func (c *soiurceConnector) Start() error {
-	for _, task := range c.tasks{
+	for _, task := range c.tasks {
 		if err := task.Start(); err != nil {
 			Logger.Error(`kafkaConnect.connector`, fmt.Sprintf(`taskBuilder start failed due to %s`, err))
 		}
@@ -52,7 +52,7 @@ func (c *soiurceConnector) Start() error {
 }
 
 func (c *soiurceConnector) Stop() error {
-	for _, task := range c.tasks{
+	for _, task := range c.tasks {
 		if err := task.Start(); err != nil {
 			Logger.Error(`kafkaConnect.connector`, fmt.Sprintf(`taskBuilder stop failed due to %s`, err))
 		}

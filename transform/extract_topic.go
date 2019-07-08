@@ -2,11 +2,12 @@ package transforms
 
 import (
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/pickme-go/log"
 	"github.com/tidwall/gjson"
-	"mybudget/kafka-connect/connector"
 	"strings"
 )
+
 /*
 	Extract data from a message and use it as the topic name. You can either use the entire key/key
 	(which should be a string), or use a field from a map or struct. Use the concrete transformation type designed for
@@ -22,8 +23,8 @@ transforms.KeyFieldExample.skip.missing.or.null=true
 
 */
 type ExtractTopic struct {
-	Type string
-	Field string
+	Type              string
+	Field             string
 	SkipMissingOrNull bool
 }
 
@@ -36,7 +37,7 @@ func (et ExtractTopic) Transform(rec connector.Recode) connector.Recode {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())
 		}
 		return NewRec(rec.Key(), rec.Value(), key.(string), rec.Partition())
-	}else if strings.Contains(et.Type, "Value") {
+	} else if strings.Contains(et.Type, "Value") {
 		value := et.getJSON(rec.Value())
 		if value == nil {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())

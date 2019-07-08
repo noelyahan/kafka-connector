@@ -10,7 +10,7 @@ package kafka_connect
 import (
 	"context"
 	"fmt"
-	"mybudget/kafka-connect/connector"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"sync"
 	"time"
 )
@@ -24,7 +24,7 @@ type buffer struct {
 	flushInterval time.Duration
 	bufferSize    int
 	lastFlushed   time.Time
-	onFlush func([]connector.Recode)
+	onFlush       func([]connector.Recode)
 	//metrics       struct {
 	//	flushLatency metrics.Observer
 	//}
@@ -43,7 +43,7 @@ func NewBuffer(id string, size int, flushInterval time.Duration, onFlush func([]
 		mu:            new(sync.Mutex),
 		bufferSize:    size,
 		flushInterval: flush,
-		onFlush:onFlush,
+		onFlush:       onFlush,
 		lastFlushed:   time.Now(),
 	}
 
@@ -57,7 +57,7 @@ func (b *buffer) Clear() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if err := b.flushAll(); err != nil {
-		Logger.Error( `kafkaConnect.buffer`, err)
+		Logger.Error(`kafkaConnect.buffer`, err)
 	}
 
 }
@@ -114,7 +114,6 @@ func (b *buffer) flushAll() error {
 	//defer func(t time.Time) {
 	//	b.metrics.flushLatency.Observe(float64(time.Since(begin).Nanoseconds()/1e3), nil)
 	//}(begin)
-
 
 	if len(b.records) < 1 {
 		return nil

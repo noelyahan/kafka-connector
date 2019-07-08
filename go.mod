@@ -1,4 +1,4 @@
-module mybudget/kafka-connect
+module github.com/gmbyapa/kafka-connector
 
 go 1.12
 

@@ -3,8 +3,8 @@ package transforms
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/pickme-go/log"
-	"mybudget/kafka-connect/connector"
 	"strings"
 )
 
@@ -59,7 +59,7 @@ func (d Drop) Transform(rec connector.Recode) connector.Recode {
 			log.Error(log.WithPrefix(dropLogPrefix, fmt.Sprintf("could not process with nullify behaviour: %+v", rec.Value())))
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())
 		}
-		for k, _ := range m {
+		for k := range m {
 			m[k] = nil
 		}
 		b, err := json.Marshal(m)

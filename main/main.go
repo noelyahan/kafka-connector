@@ -1,7 +1,7 @@
 package main
 
 import (
-	"mybudget/kafka-connect"
+	"github.com/gmbyapa/kafka-connector"
 	"os"
 	"os/signal"
 )
@@ -14,7 +14,7 @@ func main() {
 		kafka_connect.Logger.Fatal(`Connect.worker`, err)
 	}
 
-	if err :=  worker.Start(); err != nil {
+	if err := worker.Start(); err != nil {
 		kafka_connect.Logger.Fatal(`Connect.worker`, err)
 	}
 

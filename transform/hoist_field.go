@@ -3,13 +3,13 @@ package transforms
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/pickme-go/log"
-	"mybudget/kafka-connect/connector"
 	"strings"
 )
 
 type HoistField struct {
-	Type string
+	Type  string
 	Field string
 }
 
@@ -22,7 +22,7 @@ func (h HoistField) Transform(rec connector.Recode) connector.Recode {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())
 		}
 		return NewRec(key, rec.Value(), rec.Topic(), rec.Partition())
-	}else if strings.Contains(h.Type, "Value") {
+	} else if strings.Contains(h.Type, "Value") {
 		value := h.getJSON(rec.Value())
 		if value == nil {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())

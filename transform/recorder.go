@@ -1,18 +1,17 @@
 package transforms
 
 import (
-	"mybudget/kafka-connect/connector"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"time"
 )
 
-
 type ConnectRecord struct {
-	key interface{}
-	value interface{}
-	topic string
+	key       interface{}
+	value     interface{}
+	topic     string
 	partition int32
 	timestamp time.Time
-	offset int64
+	offset    int64
 }
 
 func NewRec(key, value interface{}, topic string, partition int32) connector.Recode {

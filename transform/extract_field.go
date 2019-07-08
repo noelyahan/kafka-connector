@@ -2,9 +2,9 @@ package transforms
 
 import (
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/pickme-go/log"
 	"github.com/tidwall/gjson"
-	"mybudget/kafka-connect/connector"
 	"strings"
 )
 

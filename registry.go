@@ -3,8 +3,8 @@ package kafka_connect
 import (
 	"errors"
 	"fmt"
-	"mybudget/kafka-connect/connector"
-	"mybudget/kafka-connect/encoding"
+	"github.com/gmbyapa/kafka-connector/connector"
+	"github.com/gmbyapa/kafka-connector/encoding"
 	"sync"
 )
 
@@ -20,7 +20,7 @@ type RegistryConfig struct {
 	plugins *Plugins
 }
 
-func NewRegistry(storage *connectStorage,  conf *RegistryConfig, running *sync.WaitGroup) (*Registry, error){
+func NewRegistry(storage *connectStorage, conf *RegistryConfig, running *sync.WaitGroup) (*Registry, error) {
 
 	encoders := newConcoders()
 	if err := encoders.Register(`json`, new(encoding.JsonEncoder)); err != nil {
@@ -41,14 +41,14 @@ func NewRegistry(storage *connectStorage,  conf *RegistryConfig, running *sync.W
 }
 
 // loadAll loads all the existing connectors
-func (r *Registry) loadAll() error{
+func (r *Registry) loadAll() error {
 	// get all the existing plugins in the store
 	connectors, err := r.storage.GetAll()
 	if err != nil {
 		return err
 	}
 
-	for _, c := range connectors{
+	for _, c := range connectors {
 		if err := r.loadConnector(c); err != nil {
 			Logger.Error(`connect.connectorRegistry`, err)
 		}
@@ -57,13 +57,13 @@ func (r *Registry) loadAll() error{
 	return nil
 }
 
-func (r *Registry) Connectors() ([]string, error)  {
+func (r *Registry) Connectors() ([]string, error) {
 	var list []string
 	connectors, err := r.storage.GetAll()
 	if err != nil {
 		return nil, err
 	}
-	for c := range connectors{
+	for c := range connectors {
 		list = append(list, c)
 	}
 	return list, nil
@@ -81,11 +81,11 @@ func (r *Registry) Connector(name string) (Runner, error) {
 func (r *Registry) NewConnector(config *RunnerConfig) (Runner, error) {
 	Logger.Error(``, config)
 	c, err := r.storage.Get(config.Connector.Name)
-	if  err != nil {
+	if err != nil {
 		return nil, err
 	}
 
-	if c != nil  {
+	if c != nil {
 		return nil, errors.New(fmt.Sprintf(`connector [%s] already exist`, config.Connector.Name))
 	}
 
@@ -110,7 +110,7 @@ func (r *Registry) NewConnector(config *RunnerConfig) (Runner, error) {
 	return r.Connector(config.Connector.Name)
 }
 
-func (r *Registry) saveConnector(config *RunnerConfig, c connector.Connector) error{
+func (r *Registry) saveConnector(config *RunnerConfig, c connector.Connector) error {
 
 	switch c.Type() {
 	case connector.ConnetTypeSink:
@@ -121,7 +121,7 @@ func (r *Registry) saveConnector(config *RunnerConfig, c connector.Connector) er
 	}
 }
 
-func (r *Registry) loadConnector(config *RunnerConfig) error{
+func (r *Registry) loadConnector(config *RunnerConfig) error {
 	// get plugin from plugins
 	p, err := r.plugins.Load(config.Connector.PluginPath)
 	if err != nil {
@@ -164,7 +164,7 @@ func (r *Registry) Reconfigure(name string, config *RunnerConfig) error {
 }
 
 func (r *Registry) Stop() error {
-	for _, runner := range r.runners{
+	for _, runner := range r.runners {
 		if err := runner.Stop(); err != nil {
 			Logger.Error(`connect.connectorRegistry`, err)
 		}

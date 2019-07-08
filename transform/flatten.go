@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/pickme-go/log"
-	"mybudget/kafka-connect/connector"
 	"strconv"
 	"strings"
 )
 
 type Flatten struct {
-	Type string
+	Type      string
 	Delimiter string
 }
 
@@ -61,7 +61,7 @@ func (f Flatten) Transform(rec connector.Recode) connector.Recode {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())
 		}
 		return NewRec(key, rec.Value(), rec.Topic(), rec.Partition())
-	}else if strings.Contains(f.Type, "Value") {
+	} else if strings.Contains(f.Type, "Value") {
 		value := f.getJSON(rec.Value())
 		if value == nil {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())

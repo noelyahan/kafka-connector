@@ -3,43 +3,44 @@ package kafka_connect
 import (
 	"context"
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
+	"github.com/gmbyapa/kafka-connector/transform"
 	"github.com/pickme-go/k-stream/consumer"
 	"github.com/pickme-go/log"
-	"mybudget/kafka-connect/connector"
-	"mybudget/kafka-connect/transform"
 	"sync"
 	"time"
 )
 
-type rebelanceHandler struct {}
+type rebelanceHandler struct{}
 
-func (*rebelanceHandler) OnPartitionAssigned(ctx context.Context, assigned []consumer.TopicPartition) {}
+func (*rebelanceHandler) OnPartitionAssigned(ctx context.Context, assigned []consumer.TopicPartition) {
+}
 
 func (*rebelanceHandler) OnPartitionRevoked(ctx context.Context, revoked []consumer.TopicPartition) {}
 
 type sinkTaskRunner struct {
-	id string
+	id              string
 	connectorConfig *connector.Config
 	consumerBuilder consumer.Builder
-	consumer consumer.Consumer
-	keyEncoder connector.Encoder
-	valEncoder connector.Encoder
-	taskBuilder connector.SinkTaskBuilder
-	transforms *transforms.Registry
-	task connector.SinkTask
-	transformers []transforms.Transformer
-	topics []string
-	partitions chan consumer.Partition
-	stopped chan interface{}
-	buffer *buffer
-	state TaskState
-	logger log.Logger
+	consumer        consumer.Consumer
+	keyEncoder      connector.Encoder
+	valEncoder      connector.Encoder
+	taskBuilder     connector.SinkTaskBuilder
+	transforms      *transforms.Registry
+	task            connector.SinkTask
+	transformers    []transforms.Transformer
+	topics          []string
+	partitions      chan consumer.Partition
+	stopped         chan interface{}
+	buffer          *buffer
+	state           TaskState
+	logger          log.Logger
 }
 
 func (tr *sinkTaskRunner) Init() error {
 
 	task, err := tr.taskBuilder.Build()
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
@@ -55,7 +56,7 @@ func (tr *sinkTaskRunner) Init() error {
 		return consumer.NewConsumer(conf)
 	}
 
- 	tr.buffer = NewBuffer(tr.id, 10, time.Second, func(recodes []connector.Recode) {
+	tr.buffer = NewBuffer(tr.id, 10, time.Second, func(recodes []connector.Recode) {
 		if err := task.Process(recodes); err != nil {
 			Logger.Error(`kafkaConnect.sinkTaskRunner`, err)
 		}
@@ -86,7 +87,7 @@ func (tr *sinkTaskRunner) Start() error {
 	}
 
 	running := new(sync.WaitGroup)
-	for p := range partitions{
+	for p := range partitions {
 		running.Add(1)
 		go tr.runPartition(p, running)
 	}
@@ -98,13 +99,13 @@ func (tr *sinkTaskRunner) Stop() error {
 	if err := tr.consumer.Close(); err != nil {
 		Logger.Error(`kafkaConnect.sinkTaskRunner`, err)
 	}
-	<- tr.stopped
+	<-tr.stopped
 	tr.state = TaskStopped
 	return nil
 }
 
 func (tr *sinkTaskRunner) Status() TaskState {
-	if len(tr.partitions) == 0{
+	if len(tr.partitions) == 0 {
 		return TaskIdle
 	}
 
@@ -113,7 +114,7 @@ func (tr *sinkTaskRunner) Status() TaskState {
 
 func (tr *sinkTaskRunner) runPartition(p consumer.Partition, wg *sync.WaitGroup) {
 	defer wg.Done()
-	for record := range p.Records(){
+	for record := range p.Records() {
 
 		// encode key and value
 		key, err := tr.keyEncoder.Decode(record.Key)
@@ -127,16 +128,16 @@ func (tr *sinkTaskRunner) runPartition(p consumer.Partition, wg *sync.WaitGroup)
 		}
 
 		var record connector.Recode = &connectRecord{
-			key: key,
-			value: val,
-			topic: record.Topic,
+			key:       key,
+			value:     val,
+			topic:     record.Topic,
 			partition: record.Partition,
-			offset: record.Offset,
+			offset:    record.Offset,
 			timestamp: record.Timestamp,
 		}
 
 		// apply transformers on the record
-		for _, tr := range tr.transformers{
+		for _, tr := range tr.transformers {
 			record = tr.Transform(record)
 		}
 
@@ -152,19 +153,19 @@ func (tr *sinkTaskRunner) setupLogger() log.PrefixedLogger {
 	filePath := false
 	colors := false
 
-	for config, value := range tr.connectorConfig.Configs{
-		switch config{
+	for config, value := range tr.connectorConfig.Configs {
+		switch config {
 		case `log.level`:
-			if value.(string) != string(log.FATAL){
+			if value.(string) != string(log.FATAL) {
 				level = log.Level(value.(string))
 			}
 		case `log.filePath`:
-			if value == `true`{
+			if value == `true` {
 				filePath = true
 			}
 
 		case `log.colors`:
-			if value == `true`{
+			if value == `true` {
 				colors = true
 			}
 

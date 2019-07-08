@@ -2,14 +2,14 @@ package transforms
 
 import (
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/pickme-go/log"
 	"github.com/tidwall/sjson"
-	"mybudget/kafka-connect/connector"
 	"strings"
 )
 
 type InsertField struct {
-	Type string
+	Type  string
 	Field string
 	Value interface{}
 }
@@ -23,7 +23,7 @@ func (i InsertField) Transform(rec connector.Recode) connector.Recode {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())
 		}
 		return NewRec(key, rec.Value(), rec.Topic(), rec.Partition())
-	}else if strings.Contains(i.Type, "Value") {
+	} else if strings.Contains(i.Type, "Value") {
 		value := i.getJSON(rec.Value())
 		if value == nil {
 			return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())

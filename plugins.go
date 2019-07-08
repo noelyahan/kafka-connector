@@ -2,8 +2,8 @@ package kafka_connect
 
 import (
 	"fmt"
+	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/pickme-go/errors"
-	"mybudget/kafka-connect/connector"
 	"os"
 	"path/filepath"
 	goPlugin "plugin"
@@ -13,7 +13,7 @@ import (
 
 type plugin struct {
 	TaskBuilder connector.SinkTaskBuilder
-	Connector connector.Connector
+	Connector   connector.Connector
 }
 
 type Plugins struct {
@@ -24,7 +24,7 @@ type Plugins struct {
 
 func NewPlugins(path string) *Plugins {
 	return &Plugins{
-		path:path,
+		path: path,
 		//plugins: make(map[string]*plugin),
 	}
 }
@@ -36,7 +36,7 @@ func (p *Plugins) LoadAll() error {
 		}
 
 		sts := strings.Split(info.Name(), `.`)
-		if info.IsDir() || len(sts) != 2 || sts[1] != `so`{
+		if info.IsDir() || len(sts) != 2 || sts[1] != `so` {
 			return nil
 		}
 
