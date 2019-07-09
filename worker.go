@@ -13,47 +13,48 @@ import (
 )
 
 type workerConfig struct {
-	BootstrapServers []string `yaml:"bootstrap_servers"`
-	WorkerConfigTopic string `yaml:"worker_config_topic"`
-	PluginPath string `yaml:"plugin_path"`
-	Host string `yaml:"host"`
-	Metrics struct{
+	BootstrapServers  []string `yaml:"bootstrap_servers"`
+	WorkerConfigTopic string   `yaml:"worker_config_topic"`
+	PluginPath        string   `yaml:"plugin_path"`
+	Host              string   `yaml:"host"`
+	Metrics           struct {
 		Port int `json:"port"`
 	} `json:"metrics"`
 	AdvertisedHost string `yaml:"advertised_host"`
 }
 
-func (wc *workerConfig) validate() error  {
-	if len(wc.BootstrapServers) == 0{
+func (wc *workerConfig) validate() error {
+	if len(wc.BootstrapServers) == 0 {
 		return errors.New(`connect.connectWorker.config`, `workerConfig.BootstrapServers cannot be empty`)
 	}
 
-	if wc.WorkerConfigTopic == ``{
+	if wc.WorkerConfigTopic == `` {
 		return errors.New(`connect.connectWorker.config`, `workerConfig.WorkerConfigTopic cannot be empty`)
 	}
 
-	if wc.PluginPath == ``{
+	if wc.PluginPath == `` {
 		return errors.New(`connect.connectWorker.config`, `workerConfig.PluginPath cannot be empty`)
 	}
 
-	if wc.Host == ``{
+	if wc.Host == `` {
 		return errors.New(`connect.connectWorker.config`, `workerConfig.Host cannot be empty`)
 	}
 
-	if wc.AdvertisedHost == ``{
+	if wc.AdvertisedHost == `` {
 		return errors.New(`connect.connectWorker.config`, `workerConfig.AdvertisedHost cannot be empty`)
 	}
 	return nil
 }
 
 type connectWorker struct {
-	id string
-	config workerConfig
+	id                string
+	config            workerConfig
 	connectorRegistry *Registry
-	running *sync.WaitGroup
+	running           *sync.WaitGroup
+	metricsReporter   metrics.Reporter
 }
 
-func NewConnectWorker() (*connectWorker, error)  {
+func NewConnectWorker() (*connectWorker, error) {
 	w := new(connectWorker)
 	if err := w.configure(); err != nil {
 		return nil, err
@@ -73,8 +74,8 @@ func NewConnectWorker() (*connectWorker, error)  {
 	}
 
 	p, err := producer.NewProducer(&producer.Config{
-		Logger:Logger,
-		MetricsReporter:metricsReporter,
+		Logger:           Logger,
+		MetricsReporter:  metricsReporter,
 		BootstrapServers: w.config.BootstrapServers,
 	})
 	if err != nil {
@@ -86,8 +87,8 @@ func NewConnectWorker() (*connectWorker, error)  {
 	}
 
 	reg, err := NewRegistry(NewConnectStorage(&connectStorageConfig{
-		consumer: c,
-		producer:p,
+		consumer:     c,
+		producer:     p,
 		storageTopic: w.config.WorkerConfigTopic,
 	}), regConfig, w.running)
 	if err != nil {
@@ -122,8 +123,8 @@ func (w *connectWorker) Wait() {
 
 func (w *connectWorker) Http() *Http {
 	return &Http{
-		host:w.config.Host,
-		server: &http.Server{},
+		host:         w.config.Host,
+		server:       &http.Server{},
 		connectorReg: w.connectorRegistry,
 	}
 }
@@ -149,4 +150,3 @@ func (w *connectWorker) configure() error {
 	w.config = conf
 	return nil
 }
-
