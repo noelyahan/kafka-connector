@@ -16,8 +16,7 @@ type ReplaceFieldProps struct {
 type ReplaceField struct {
 	Type            string
 	BlackListFields []string
-	// TODO
-	//WhiteList []string
+	WhiteList []string
 	Renames []ReplaceFieldProps
 }
 
@@ -48,17 +47,32 @@ func (r ReplaceField) getJSON(value interface{}) interface{} {
 		return nil
 	}
 	var err error
+
+	tmpVal := value.(string)
+
+
+	for _, remove := range r.BlackListFields {
+		value, _ = sjson.Delete(value.(string), remove)
+	}
+
+	if len(r.BlackListFields) == 0 && len(r.WhiteList) != 0 {
+		value = `{}`
+	}
+	for _, add := range r.WhiteList {
+		cVal := gjson.Get(tmpVal, add).Value()
+		value, _ = sjson.Set(value.(string), add, cVal)
+	}
+
 	for _, rename := range r.Renames {
 		cVal := gjson.Get(value.(string), rename.Field).Value()
+		if cVal == nil {
+			continue
+		}
 		value, err = sjson.Delete(value.(string), rename.Field)
 		if err != nil {
 			continue
 		}
 		value, _ = sjson.Set(value.(string), rename.NewField, cVal)
-	}
-
-	for _, remove := range r.BlackListFields {
-		value, _ = sjson.Delete(value.(string), remove)
 	}
 	return value
 }

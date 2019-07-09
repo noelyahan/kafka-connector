@@ -26,7 +26,7 @@ func (r *Registry) Init(config map[string]interface{}) []Transformer {
 	// transformers : cast1, cast2
 	// cast1.p1 : 100
 	// cast2.p1 : 300
-	for _ , tName := range txs {
+	for _, tName := range txs {
 		//tName = strings.Replace(tName, " ", "", -1)
 		transType := config[fmt.Sprintf(`transforms.%v.type`, tName)].(string)
 		switchTrans := strings.Split(transType, "$")[0]
@@ -69,7 +69,7 @@ func (r *Registry) Init(config map[string]interface{}) []Transformer {
 			transformers = append(transformers, HoistField{transType, field})
 		case `InsertField`:
 			field := config[fmt.Sprintf(`transforms.%v.static.field`, tName)].(string)
-			value := config[fmt.Sprintf(`transforms.%v.static.key`, tName)]
+			value := config[fmt.Sprintf(`transforms.%v.static.value`, tName)]
 
 			transformers = append(transformers, InsertField{transType, field, value})
 		case `MaskField`:
@@ -80,18 +80,30 @@ func (r *Registry) Init(config map[string]interface{}) []Transformer {
 			transformers = append(transformers, MaskField{transType, fields})
 		case `ReplaceField`:
 			rp := make([]ReplaceFieldProps, 0)
-			rn := config[fmt.Sprintf(`transforms.%v.renames`, tName)].(string)
-			bl := config[fmt.Sprintf(`transforms.%v.blacklist`, tName)].(string)
+			rn := config[fmt.Sprintf(`transforms.%v.renames`, tName)]
+			bl := config[fmt.Sprintf(`transforms.%v.blacklist`, tName)]
+			wl := config[fmt.Sprintf(`transforms.%v.whitelist`, tName)]
 
-			bl = strings.Replace(bl, " ", "", -1)
-			rn = strings.Replace(rn, " ", "", -1)
-			renames := strings.Split(rn, ",")
+			var renames, bls, wls []string
+			if bl != nil {
+				s := strings.Replace(bl.(string), " ", "", -1)
+				bls = strings.Split(s, ",")
+			}
+			if rn != nil {
+				rn = strings.Replace(rn.(string), " ", "", -1)
+				renames = strings.Split(rn.(string), ",")
+			}
+			if wl != nil {
+				s := strings.Replace(wl.(string), " ", "", -1)
+				wls = strings.Split(s, ",")
+			}
+
 			for _, rename := range renames {
 				props := strings.Split(rename, ":")
 				rp = append(rp, ReplaceFieldProps{props[0], props[1]})
 			}
 
-			transformers = append(transformers, ReplaceField{transType, strings.Split(bl, ","), rp})
+			transformers = append(transformers, ReplaceField{transType, bls, wls, rp})
 		case `ValueToKey`:
 			f := config[fmt.Sprintf(`transforms.%v.fields`, tName)].(string)
 			f = strings.Replace(f, " ", "", -1)

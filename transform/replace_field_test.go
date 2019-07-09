@@ -14,15 +14,15 @@ func TestReplaceFieldKey_Transform(t *testing.T) {
 	}{
 		{ // TEST 1
 			`{"age": "12.2324", "user": {"age": "12.456", "address": {"country": "sl"}}}`,
-			&ReplaceField{transType, []string{"age", "user"}, []ReplaceFieldProps{}},
+			&ReplaceField{transType, []string{"age", "user"}, []string{},[]ReplaceFieldProps{}},
 			`{}`},
 		{ // TEST 2
 			`{"age": "12.2324", "user": {"age": "12.456", "address": {"country": "sl"}}}`,
-			&ReplaceField{transType, []string{"age", "user.address"}, []ReplaceFieldProps{}},
+			&ReplaceField{transType, []string{"age", "user.address"}, []string{},[]ReplaceFieldProps{}},
 			`{"user":{"age":"12.456"}}`},
 		{ // TEST 3
 			`{"age": "12.2324", "user": {"age": "12.456", "address": {"country": "sl"}}}`,
-			&ReplaceField{transType, nil, []ReplaceFieldProps{
+			&ReplaceField{transType, nil, []string{},[]ReplaceFieldProps{
 				{"age", "Age"},
 				{"user", "User"},
 				{"User.age", "User.Age"},
@@ -31,7 +31,7 @@ func TestReplaceFieldKey_Transform(t *testing.T) {
 			`{"User":{"Address":{"country":"sl"},"Age":"12.456"},"Age":"12.2324"}`},
 		{ // TEST 4
 			`{"username": "test", "password": "123"}`,
-			&ReplaceField{transType, nil, []ReplaceFieldProps{
+			&ReplaceField{transType, nil, []string{},[]ReplaceFieldProps{
 				{"username", "user.name"},
 				{"password", "user.password"},
 			}},
@@ -65,28 +65,32 @@ func TestReplaceFieldValue_Transform(t *testing.T) {
 	}{
 		{ // TEST 1
 			`{"age": "12.2324", "user": {"age": "12.456", "address": {"country": "sl"}}}`,
-			&ReplaceField{transType, []string{"age", "user"}, []ReplaceFieldProps{}},
-			`{}`},
+			&ReplaceField{transType, []string{"age", "user"}, []string{"age"}, []ReplaceFieldProps{}},
+			`{"age":"12.2324"}`},
 		{ // TEST 2
 			`{"age": "12.2324", "user": {"age": "12.456", "address": {"country": "sl"}}}`,
-			&ReplaceField{transType, []string{"age", "user.address"}, []ReplaceFieldProps{}},
+			&ReplaceField{transType, []string{"age", "user.address"}, []string{},[]ReplaceFieldProps{}},
 			`{"user":{"age":"12.456"}}`},
 		{ // TEST 3
 			`{"age": "12.2324", "user": {"age": "12.456", "address": {"country": "sl"}}}`,
-			&ReplaceField{transType, nil, []ReplaceFieldProps{
-				{"age", "Age"},
-				{"user", "User"},
-				{"User.age", "User.Age"},
-				{"User.address", "User.Address"},
+			&ReplaceField{transType, []string{"user.age", "user.address", "user"}, []string{},[]ReplaceFieldProps{
+				{"age", "user.age"},
+				//{"user", "User"},
+				//{"User.age", "User.Age"},
+				//{"User.address", "User.Address"},
 			}},
-			`{"User":{"Address":{"country":"sl"},"Age":"12.456"},"Age":"12.2324"}`},
+			`{"user":{"age":"12.2324"}}`},
 		{ // TEST 4
 			`{"username": "test", "password": "123"}`,
-			&ReplaceField{transType, nil, []ReplaceFieldProps{
+			&ReplaceField{transType, nil, []string{},[]ReplaceFieldProps{
 				{"username", "user.name"},
 				{"password", "user.password"},
 			}},
 			`{"user":{"password":"123","name":"test"}}`},
+		{ // TEST 5
+			`{"age": "12.2324", "user": {"age": "12.456", "address": {"country": "sl"}}}`,
+			&ReplaceField{transType, []string{}, []string{"age"}, []ReplaceFieldProps{}},
+			`{"age":"12.2324"}`},
 
 	}
 
