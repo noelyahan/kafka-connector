@@ -79,7 +79,6 @@ func (r *Registry) Connector(name string) (Runner, error) {
 }
 
 func (r *Registry) NewConnector(config *RunnerConfig) (Runner, error) {
-	Logger.Error(``, config)
 	c, err := r.storage.Get(config.Connector.Name)
 	if err != nil {
 		return nil, err

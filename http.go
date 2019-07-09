@@ -11,17 +11,17 @@ import (
 )
 
 type errorResponse struct {
-	Code int `json:"error_code"`
+	Code    int    `json:"error_code"`
 	Message string `json:"message"`
 }
 
 type Http struct {
-	server *http.Server
-	host string
+	server       *http.Server
+	host         string
 	connectorReg *Registry
 }
 
-func (h *Http) connectors(writer http.ResponseWriter, request *http.Request)  {
+func (h *Http) connectors(writer http.ResponseWriter, request *http.Request) {
 	connectors, err := h.connectorReg.Connectors()
 	if err != nil {
 		h.error(writer, err)
@@ -31,7 +31,7 @@ func (h *Http) connectors(writer http.ResponseWriter, request *http.Request)  {
 	h.write(writer, connectors)
 }
 
-func (h *Http) getConnector(writer http.ResponseWriter, request *http.Request)  {
+func (h *Http) getConnector(writer http.ResponseWriter, request *http.Request) {
 
 	connector, err := h.connectorReg.Connector(mux.Vars(request)[`name`])
 	if err != nil {
@@ -42,7 +42,7 @@ func (h *Http) getConnector(writer http.ResponseWriter, request *http.Request)  
 	h.write(writer, connector.Config())
 }
 
-func (h *Http) createConnector(writer http.ResponseWriter, request *http.Request)  {
+func (h *Http) createConnector(writer http.ResponseWriter, request *http.Request) {
 	config := RunnerConfig{}
 	if err := json.NewDecoder(request.Body).Decode(&config.Connector); err != nil {
 		h.error(writer, err)
@@ -59,7 +59,7 @@ func (h *Http) createConnector(writer http.ResponseWriter, request *http.Request
 	h.write(writer, connector.Config())
 }
 
-func (h *Http) reConfigureConnector(writer http.ResponseWriter, request *http.Request)  {
+func (h *Http) reConfigureConnector(writer http.ResponseWriter, request *http.Request) {
 
 	config := RunnerConfig{}
 	if err := json.NewDecoder(request.Body).Decode(&config.Connector); err != nil {
@@ -77,7 +77,7 @@ func (h *Http) reConfigureConnector(writer http.ResponseWriter, request *http.Re
 	h.write(writer, config)
 }
 
-func (h *Http) Start()  {
+func (h *Http) Start() {
 	r := mux.NewRouter()
 
 	// Metrics handler
@@ -120,14 +120,14 @@ func (h *Http) Start()  {
 	}).Methods(http.MethodPut)
 
 	h.server.Addr = h.host
-	h.server.Handler = handlers.RecoveryHandler()(r)
+	h.server.Handler = handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(r)
 	err := h.server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		Logger.Fatal(`web server stopped due to : `, err)
 	}
 }
 
-func (h *Http) write(w http.ResponseWriter, i interface{}){
+func (h *Http) write(w http.ResponseWriter, i interface{}) {
 	byt, err := json.Marshal(i)
 	if err != nil {
 		h.error(w, err)
@@ -136,19 +136,19 @@ func (h *Http) write(w http.ResponseWriter, i interface{}){
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(byt)
-	if  err != nil {
+	if err != nil {
 		Logger.Error(`kafka_connect.Http`, err)
 	}
 }
 
-func (h *Http) error(w http.ResponseWriter, err error){
+func (h *Http) error(w http.ResponseWriter, err error) {
 	resp := errorResponse{
-		Code: http.StatusUnprocessableEntity,
+		Code:    http.StatusUnprocessableEntity,
 		Message: err.Error(),
 	}
 
 	byt, err := json.Marshal(resp)
-	if  err != nil {
+	if err != nil {
 		Logger.Error(`kafka_connect.Http`, err)
 		return
 	}
@@ -157,12 +157,12 @@ func (h *Http) error(w http.ResponseWriter, err error){
 	w.WriteHeader(http.StatusUnprocessableEntity)
 
 	_, err = w.Write(byt)
-	if  err != nil {
+	if err != nil {
 		Logger.Error(`kafka_connect.Http`, err)
 	}
 }
 
-func (h *Http) Stop() error{
-	ctx, _ := context.WithTimeout(context.Background(), 10 * time.Second)
+func (h *Http) Stop() error {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	return h.server.Shutdown(ctx)
 }
