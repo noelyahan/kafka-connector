@@ -18,7 +18,9 @@ type workerConfig struct {
 	PluginPath        string   `yaml:"plugin_path"`
 	Host              string   `yaml:"host"`
 	Metrics           struct {
-		Port int `json:"port"`
+		Enabled   bool   `json:"enabled"`
+		Namespace string `json:"namespace"`
+		Host      string `json:"host"`
 	} `json:"metrics"`
 	AdvertisedHost string `yaml:"advertised_host"`
 }
@@ -34,6 +36,14 @@ func (wc *workerConfig) validate() error {
 
 	if wc.PluginPath == `` {
 		return errors.New(`connect.connectWorker.config`, `workerConfig.PluginPath cannot be empty`)
+	}
+
+	if wc.Metrics.Enabled && wc.Metrics.Host == `` {
+		return errors.New(`connect.connectWorker.config`, `workerConfig.Metrics.Host cannot be empty`)
+	}
+
+	if wc.Metrics.Enabled && wc.Metrics.Namespace == `` {
+		return errors.New(`connect.connectWorker.config`, `workerConfig.Metrics.Namespace cannot be empty`)
 	}
 
 	if wc.Host == `` {
@@ -59,9 +69,10 @@ func NewConnectWorker() (*connectWorker, error) {
 	if err := w.configure(); err != nil {
 		return nil, err
 	}
+
 	w.id = w.config.Host
 	w.running = new(sync.WaitGroup)
-	metricsReporter := metrics.PrometheusReporter(`kafka_connect`, `kafka_connect`)
+	metricsReporter := metrics.PrometheusReporter(w.config.Metrics.Namespace, `connectors`)
 
 	consumerConfig := consumer.NewPartitionConsumerConfig()
 	consumerConfig.BootstrapServers = w.config.BootstrapServers

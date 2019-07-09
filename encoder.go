@@ -10,7 +10,7 @@ type encoders struct {
 	list map[string]connector.Encoder
 }
 
-func newConcoders() *encoders {
+func newEncoders() *encoders {
 	return &encoders{
 		list: make(map[string]connector.Encoder),
 	}

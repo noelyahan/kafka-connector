@@ -4,3 +4,6 @@ worker_config_topic: "connect_worker_config"
 plugin_path: "plugins/"
 host: "localhost:8888"
 advertised_host: "localhost"
+metrics:
+  namespace: "gcp"
+  host: "8889"

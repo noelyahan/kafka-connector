@@ -40,9 +40,8 @@ func (c *sinkRunner) Start() error {
 	topics := c.config.Connector.Configs[`topics`]
 	for i := 1; i <= c.config.Connector.MaxTasks; i++ {
 		task := &sinkTaskRunner{
-			id:          fmt.Sprintf(`%d`, i),
-			taskBuilder: c.taskBuilder,
-			//consumerBuilder:c.consumerBuilder,
+			id:              fmt.Sprintf(`%d`, i),
+			taskBuilder:     c.taskBuilder,
 			transforms:      c.transformers,
 			keyEncoder:      c.keyEncoder(),
 			valEncoder:      c.valEncoder(),

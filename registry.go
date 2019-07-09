@@ -22,7 +22,7 @@ type RegistryConfig struct {
 
 func NewRegistry(storage *connectStorage, conf *RegistryConfig, running *sync.WaitGroup) (*Registry, error) {
 
-	encoders := newConcoders()
+	encoders := newEncoders()
 	if err := encoders.Register(`json`, new(encoding.JsonEncoder)); err != nil {
 		return nil, err
 	}
