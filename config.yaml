@@ -1,9 +1,10 @@
 bootstrap_servers:
-  - "localhost:9092"
+  - "192.168.0.101:9092"
 worker_config_topic: "connect_worker_config"
 plugin_path: "plugins/"
 host: "localhost:8888"
 advertised_host: "localhost"
 metrics:
+  enabled: true
   namespace: "gcp"
   host: ":8889"

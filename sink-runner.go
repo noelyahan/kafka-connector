@@ -5,6 +5,7 @@ import (
 	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/gmbyapa/kafka-connector/transform"
 	"github.com/pickme-go/k-stream/consumer"
+	"github.com/pickme-go/metrics"
 	"strings"
 )
 
@@ -18,21 +19,26 @@ type sinkRunner struct {
 	consumerBuilder consumer.Builder
 	transformers    *transforms.Registry
 	stopped         chan interface{}
+	metricReporter  metrics.Reporter
 }
 
 func newSinkRunner(
 	configs *RunnerConfig,
 	connector connector.Connector,
 	taskBuilder connector.TaskBuilder,
-	keyEncoder, valEncoder connector.EncoderBuilder) *sinkRunner {
+	keyEncoder, valEncoder connector.EncoderBuilder,
+	metricReporter metrics.Reporter) *sinkRunner {
+	configs.Connector.Metrics = metricReporter
+
 	return &sinkRunner{
-		config:       configs,
-		transformers: transforms.NewReg(),
-		connector:    connector,
-		keyEncoder:   keyEncoder,
-		valEncoder:   valEncoder,
-		taskBuilder:  taskBuilder,
-		stopped:      make(chan interface{}, 1),
+		config:         configs,
+		transformers:   transforms.NewReg(),
+		connector:      connector,
+		keyEncoder:     keyEncoder,
+		valEncoder:     valEncoder,
+		taskBuilder:    taskBuilder,
+		stopped:        make(chan interface{}, 1),
+		metricReporter: metricReporter,
 	}
 }
 
@@ -48,6 +54,7 @@ func (c *sinkRunner) Start() error {
 			topics:          strings.Split(topics.(string), `,`),
 			connectorConfig: c.config.Connector,
 			stopped:         make(chan interface{}, 1),
+			metricReporter:  c.metricReporter,
 		}
 		c.tasks = append(c.tasks, task)
 		if err := task.Init(); err != nil {
@@ -97,10 +104,9 @@ func (c *sinkRunner) Reconfigure(configs *RunnerConfig) error {
 
 func (c *sinkRunner) configure() error {
 	// setup consumerBuilder builder
-
 	return nil
 }
 
 func (c *sinkRunner) Init() error {
-	return c.configure()
+	return c.connector.Init(c.config.Connector)
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/gmbyapa/kafka-connector/transform"
 	"github.com/pickme-go/k-stream/consumer"
 	"github.com/pickme-go/log"
+	"github.com/pickme-go/metrics"
 	"sync"
 	"time"
 )
@@ -34,6 +35,7 @@ type sinkTaskRunner struct {
 	buffer          *buffer
 	state           TaskState
 	logger          log.Logger
+	metricReporter  metrics.Reporter
 }
 
 func (tr *sinkTaskRunner) Init() error {
@@ -49,6 +51,7 @@ func (tr *sinkTaskRunner) Init() error {
 		consumerConfig := consumerConfig(tr.connectorConfig.Configs)
 		conf, err := consumerConfig.Config()
 		conf.GroupId = tr.connectorConfig.Name
+		conf.MetricsReporter = tr.metricReporter
 		conf.Logger = logger
 		if err != nil {
 			return nil, err
@@ -65,11 +68,17 @@ func (tr *sinkTaskRunner) Init() error {
 		}
 	})
 
+	tr.buffer.metrics.flushLatency = tr.metricReporter.Observer(metrics.MetricConf{
+		Path:        `task_buffer_flush_latency_microseconds`,
+		ConstLabels: map[string]string{`task_id`: tr.id},
+	})
+
 	tr.transformers = tr.transforms.Init(tr.connectorConfig.Configs)
 
 	tr.task.Configure(&connector.TaskConfig{
-		TaskId: tr.id,
-		Logger: logger,
+		TaskId:    tr.id,
+		Logger:    logger,
+		Connector: tr.connectorConfig,
 	})
 
 	c, err := tr.consumerBuilder(nil)

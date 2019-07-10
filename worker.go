@@ -94,7 +94,8 @@ func NewConnectWorker() (*connectWorker, error) {
 	}
 
 	regConfig := &RegistryConfig{
-		plugins: NewPlugins(w.config.PluginPath),
+		plugins:        NewPlugins(w.config.PluginPath),
+		metricReporter: metricsReporter,
 	}
 
 	reg, err := NewRegistry(NewConnectStorage(&connectStorageConfig{

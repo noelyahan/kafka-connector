@@ -5,19 +5,22 @@ import (
 	"fmt"
 	"github.com/gmbyapa/kafka-connector/connector"
 	"github.com/gmbyapa/kafka-connector/encoding"
+	"github.com/pickme-go/metrics"
 	"sync"
 )
 
 type Registry struct {
-	plugins  *Plugins
-	storage  *connectStorage
-	runners  map[string]Runner
-	encoders *encoders
-	running  *sync.WaitGroup
+	plugins        *Plugins
+	storage        *connectStorage
+	runners        map[string]Runner
+	encoders       *encoders
+	running        *sync.WaitGroup
+	metricReporter metrics.Reporter
 }
 
 type RegistryConfig struct {
-	plugins *Plugins
+	plugins        *Plugins
+	metricReporter metrics.Reporter
 }
 
 func NewRegistry(storage *connectStorage, conf *RegistryConfig, running *sync.WaitGroup) (*Registry, error) {
@@ -32,11 +35,12 @@ func NewRegistry(storage *connectStorage, conf *RegistryConfig, running *sync.Wa
 	}
 
 	return &Registry{
-		plugins:  conf.plugins,
-		storage:  storage,
-		encoders: encoders,
-		runners:  make(map[string]Runner),
-		running:  running,
+		plugins:        conf.plugins,
+		storage:        storage,
+		encoders:       encoders,
+		runners:        make(map[string]Runner),
+		running:        running,
+		metricReporter: conf.metricReporter,
 	}, nil
 }
 
@@ -137,7 +141,7 @@ func (r *Registry) loadConnector(config *RunnerConfig) error {
 		return err
 	}
 
-	runner := newSinkRunner(config, p.Connector, p.TaskBuilder, keyEncoder, valEncoder)
+	runner := newSinkRunner(config, p.Connector, p.TaskBuilder, keyEncoder, valEncoder, r.metricReporter)
 	if err := runner.Init(); err != nil {
 		return err
 	}
