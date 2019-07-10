@@ -9,7 +9,7 @@ require (
 	github.com/pickme-go/errors v1.0.0
 	github.com/pickme-go/k-stream v0.0.1-beta.0.20190709174140-26b21222e43a
 	github.com/pickme-go/log v1.2.3
-	github.com/pickme-go/metrics v1.0.2
+	github.com/pickme-go/metrics v1.0.3
 	github.com/prometheus/client_golang v1.0.0
 	github.com/tidwall/gjson v1.3.0
 	github.com/tidwall/sjson v1.0.4
