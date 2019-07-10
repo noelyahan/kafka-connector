@@ -10,6 +10,7 @@ type Config struct {
 }
 
 type TaskConfig struct {
-	TaskId string
-	Logger Logger `json:"-"`
+	Connector Config `json:"-"`
+	TaskId    string `json:"-"`
+	Logger    Logger `json:"-"`
 }
