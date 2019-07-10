@@ -8,3 +8,8 @@ type Config struct {
 	Metrics    MetricsReporter        `json:"-"`
 	Logger     Logger                 `json:"-"`
 }
+
+type TaskConfig struct {
+	TaskId string
+	Logger Logger `json:"-"`
+}

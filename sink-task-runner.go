@@ -15,7 +15,6 @@ type rebelanceHandler struct{}
 
 func (*rebelanceHandler) OnPartitionAssigned(ctx context.Context, assigned []consumer.TopicPartition) {
 }
-
 func (*rebelanceHandler) OnPartitionRevoked(ctx context.Context, revoked []consumer.TopicPartition) {}
 
 type sinkTaskRunner struct {
@@ -25,7 +24,7 @@ type sinkTaskRunner struct {
 	consumer        consumer.Consumer
 	keyEncoder      connector.Encoder
 	valEncoder      connector.Encoder
-	taskBuilder     connector.SinkTaskBuilder
+	taskBuilder     connector.TaskBuilder
 	transforms      *transforms.Registry
 	task            connector.SinkTask
 	transformers    []transforms.Transformer
@@ -44,11 +43,13 @@ func (tr *sinkTaskRunner) Init() error {
 		return err
 	}
 
+	logger := tr.setupLogger()
+
 	tr.consumerBuilder = func(config *consumer.Config) (consumer.Consumer, error) {
 		consumerConfig := consumerConfig(tr.connectorConfig.Configs)
 		conf, err := consumerConfig.Config()
 		conf.GroupId = tr.connectorConfig.Name
-		conf.Logger = tr.setupLogger()
+		conf.Logger = logger
 		if err != nil {
 			return nil, err
 		}
@@ -56,16 +57,20 @@ func (tr *sinkTaskRunner) Init() error {
 		return consumer.NewConsumer(conf)
 	}
 
-	tr.buffer = NewBuffer(tr.id, 10, time.Second, func(recodes []connector.Recode) {
-		if err := task.Process(recodes); err != nil {
+	tr.task = task.(connector.SinkTask)
+
+	tr.buffer = NewBuffer(tr.id, 1, 100*time.Microsecond, func(recodes []connector.Recode) {
+		if err := tr.task.Process(recodes); err != nil {
 			Logger.Error(`kafkaConnect.sinkTaskRunner`, err)
 		}
 	})
 
 	tr.transformers = tr.transforms.Init(tr.connectorConfig.Configs)
-	tr.task = task
 
-	tr.task.Configure(tr.connectorConfig)
+	tr.task.Configure(&connector.TaskConfig{
+		TaskId: tr.id,
+		Logger: logger,
+	})
 
 	c, err := tr.consumerBuilder(nil)
 	if err != nil {
@@ -163,12 +168,10 @@ func (tr *sinkTaskRunner) setupLogger() log.PrefixedLogger {
 			if value == `true` {
 				filePath = true
 			}
-
 		case `log.colors`:
 			if value == `true` {
 				colors = true
 			}
-
 		}
 	}
 

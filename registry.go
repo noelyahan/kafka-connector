@@ -112,7 +112,7 @@ func (r *Registry) NewConnector(config *RunnerConfig) (Runner, error) {
 func (r *Registry) saveConnector(config *RunnerConfig, c connector.Connector) error {
 
 	switch c.Type() {
-	case connector.ConnetTypeSink:
+	case connector.ConnectTypeSink:
 		config.State = RunnerCreated
 		return r.storage.Save(config)
 	default:

@@ -1,7 +1,7 @@
 package connector
 
 type Task interface {
-	Configure(config *Config)
+	Configure(config *TaskConfig)
 	Init() error
 	Start() error
 	Stop() error
@@ -18,6 +18,6 @@ type SinkTask interface {
 	Process([]Recode) error
 }
 
-type SinkTaskBuilder interface {
-	Build() (SinkTask, error)
+type TaskBuilder interface {
+	Build() (Task, error)
 }

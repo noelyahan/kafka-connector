@@ -6,7 +6,26 @@ import (
 	"os/signal"
 )
 
+type I interface {
+	Get()
+}
+
+type II interface {
+	Get()
+}
+
+type i struct{}
+
+func (i) Get() {}
+
+var ii II = i{}
+
 func main() {
+
+	iii, ok := ii.(I)
+	println(iii, ok)
+
+	//return
 
 	// initiate worker
 	worker, err := kafka_connect.NewConnectWorker()

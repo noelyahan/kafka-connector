@@ -9,8 +9,8 @@ package kafka_connect
 
 import (
 	"context"
-	"fmt"
 	"github.com/gmbyapa/kafka-connector/connector"
+	"github.com/pickme-go/metrics"
 	"sync"
 	"time"
 )
@@ -25,9 +25,9 @@ type buffer struct {
 	bufferSize    int
 	lastFlushed   time.Time
 	onFlush       func([]connector.Recode)
-	//metrics       struct {
-	//	flushLatency metrics.Observer
-	//}
+	metrics       struct {
+		flushLatency metrics.Observer
+	}
 }
 
 // NewBuffer creates a new buffer object
@@ -52,16 +52,6 @@ func NewBuffer(id string, size int, flushInterval time.Duration, onFlush func([]
 	return b
 }
 
-// Clear clears the buffer
-func (b *buffer) Clear() {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	if err := b.flushAll(); err != nil {
-		Logger.Error(`kafkaConnect.buffer`, err)
-	}
-
-}
-
 func (b *buffer) Records() []connector.Recode {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -76,7 +66,7 @@ func (b *buffer) Store(record connector.Recode) {
 	b.records = append(b.records, record)
 
 	if len(b.records) >= b.bufferSize {
-		b.flush()
+		//b.flush()
 	}
 }
 
@@ -86,17 +76,12 @@ func (b *buffer) runFlusher() {
 
 	for range tic.C {
 
-		if time.Since(b.lastFlushed) <= b.flushInterval {
-			continue
-		}
+		//if time.Since(b.lastFlushed) <= b.flushInterval {
+		//	continue
+		//}
 
-		b.mu.Lock()
-		l := len(b.records)
-		b.mu.Unlock()
-
-		if l > 0 {
+		if len(b.records) > 0 {
 			b.flush()
-			println(`flushed`)
 		}
 	}
 }
@@ -110,14 +95,14 @@ func (b *buffer) flush() {
 }
 
 func (b *buffer) flushAll() error {
-	//begin := time.Now()
-	//defer func(t time.Time) {
-	//	b.metrics.flushLatency.Observe(float64(time.Since(begin).Nanoseconds()/1e3), nil)
-	//}(begin)
-
 	if len(b.records) < 1 {
 		return nil
 	}
+
+	begin := time.Now()
+	defer func(t time.Time) {
+		b.metrics.flushLatency.Observe(float64(time.Since(begin).Nanoseconds()/1e3), nil)
+	}(begin)
 
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -137,8 +122,6 @@ func (b *buffer) reset() {
 
 func (b *buffer) Close() {
 	// flush existing buffer
-	Logger.Info(`kafkaConnect.buffer`, fmt.Sprintf(`flushing buffer... on %s`, b.id))
-
 	if err := b.flushAll(); err != nil {
 		Logger.Error(`kafkaConnect.buffer`, err)
 	}

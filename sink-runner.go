@@ -14,7 +14,7 @@ type sinkRunner struct {
 	keyEncoder      connector.EncoderBuilder
 	valEncoder      connector.EncoderBuilder
 	connector       connector.Connector
-	taskBuilder     connector.SinkTaskBuilder
+	taskBuilder     connector.TaskBuilder
 	consumerBuilder consumer.Builder
 	transformers    *transforms.Registry
 	stopped         chan interface{}
@@ -23,7 +23,7 @@ type sinkRunner struct {
 func newSinkRunner(
 	configs *RunnerConfig,
 	connector connector.Connector,
-	taskBuilder connector.SinkTaskBuilder,
+	taskBuilder connector.TaskBuilder,
 	keyEncoder, valEncoder connector.EncoderBuilder) *sinkRunner {
 	return &sinkRunner{
 		config:       configs,

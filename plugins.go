@@ -12,7 +12,7 @@ import (
 )
 
 type plugin struct {
-	TaskBuilder connector.SinkTaskBuilder
+	TaskBuilder connector.TaskBuilder
 	Connector   connector.Connector
 }
 
@@ -77,15 +77,15 @@ func (p *Plugins) Load(path string) (*plugin, error) {
 		return nil, err
 	}
 
-	connect, ok := sConector.(*connector.Connector)
+	connect, ok := (sConector).(*connector.Connector)
 	if !ok {
-		return nil, errors.New(`connect.connectWorker`, fmt.Sprintf(`invalid Connector type want Connector have %s`, reflect.TypeOf(sConector)))
+		return nil, errors.New(`connect.connectWorker`, fmt.Sprintf(`invalid Connector type want [Connector] have %s`, reflect.TypeOf(sConector)))
 	}
 
 	plugin.Connector = *connect
 
 	switch builder := sTask.(type) {
-	case *connector.SinkTaskBuilder:
+	case *connector.TaskBuilder:
 		plugin.TaskBuilder = *builder
 	default:
 		return nil, errors.New(`connect.connectWorker`, fmt.Sprintf(`invalid Task type want SinkTaskBuilder or SourceTaskBuilder have %s`, reflect.TypeOf(sTask)))

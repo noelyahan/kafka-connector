@@ -2,8 +2,8 @@ package connector
 
 type ConnectType string
 
-const ConnetTypeSource ConnectType = `source`
-const ConnetTypeSink ConnectType = `sink`
+const ConnectTypeSource ConnectType = `source`
+const ConnectTypeSink ConnectType = `sink`
 
 type Connector interface {
 	Init(configs *Config) error

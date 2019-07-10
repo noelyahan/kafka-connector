@@ -6,4 +6,4 @@ host: "localhost:8888"
 advertised_host: "localhost"
 metrics:
   namespace: "gcp"
-  host: "8889"
+  host: ":8889"

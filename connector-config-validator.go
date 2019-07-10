@@ -60,16 +60,6 @@ func validateConnectorConfig(config *connector.Config) error {
 
 }
 
-//type connectorConfig map[string]interface{}
-//
-//func (c connectorConfig) Validate() error{
-//
-//}
-//
-//func (c consumerConfig) Config() {
-//
-//}
-
 type consumerConfig map[string]interface{}
 
 func (c consumerConfig) Validate() error { return nil }
