@@ -2,6 +2,7 @@ package transforms
 
 import (
 	"fmt"
+	"github.com/pickme-go/log"
 	"strings"
 	"sync"
 )
@@ -27,7 +28,10 @@ func (r *Registry) Init(config map[string]interface{}) []Transformer {
 	// cast1.p1 : 100
 	// cast2.p1 : 300
 	for _, tName := range txs {
-		//tName = strings.Replace(tName, " ", "", -1)
+		if config[fmt.Sprintf(`transforms.%v.type`, tName)] == nil {
+			log.Error(log.WithPrefix(castLogPrefix, fmt.Sprintf(`transforms.%v.type not found`, tName)))
+			continue
+		}
 		transType := config[fmt.Sprintf(`transforms.%v.type`, tName)].(string)
 		switchTrans := strings.Split(transType, "$")[0]
 		switch switchTrans {
@@ -56,7 +60,11 @@ func (r *Registry) Init(config map[string]interface{}) []Transformer {
 			transformers = append(transformers, ExtractField{transType, field})
 		case `ExtractTopic`:
 			field := config[fmt.Sprintf(`transforms.%v.field`, tName)].(string)
-			missOrNull := config[fmt.Sprintf(`transforms.%v.skip.missing.or.null`, tName)].(bool)
+			var missOrNull bool
+			b := config[fmt.Sprintf(`transforms.%v.skip.missing.or.null`, tName)]
+			if b != nil {
+				missOrNull = b.(bool)
+			}
 
 			transformers = append(transformers, ExtractTopic{transType, field, missOrNull})
 		case `Flatten`:
@@ -114,9 +122,4 @@ func (r *Registry) Init(config map[string]interface{}) []Transformer {
 	}
 
 	return transformers
-}
-
-func (r *Registry) Get(name string) []Transformer {
-	res, _ := r.transformerMap.Load(name)
-	return res.([]Transformer)
 }
