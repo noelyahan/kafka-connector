@@ -113,9 +113,13 @@ func (r *Registry) Init(config map[string]interface{}) []Transformer {
 
 			transformers = append(transformers, ReplaceField{transType, bls, wls, rp})
 		case `ValueToKey`:
-			f := config[fmt.Sprintf(`transforms.%v.fields`, tName)].(string)
-			f = strings.Replace(f, " ", "", -1)
-			fields := strings.Split(f, ",")
+			var s string
+			f := config[fmt.Sprintf(`transforms.%v.fields`, tName)]
+			if f != nil {
+				s = f.(string)
+			}
+			s = strings.Replace(s, " ", "", -1)
+			fields := strings.Split(s, ",")
 
 			transformers = append(transformers, ValueToKey{fields})
 		}

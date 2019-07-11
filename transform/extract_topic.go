@@ -31,6 +31,9 @@ type ExtractTopic struct {
 var extractTopicLogPrefix = "ExtractTopic SMT"
 
 func (et ExtractTopic) Transform(rec connector.Recode) connector.Recode {
+	if et.Field == `` {
+		return NewRec(rec.Key(), rec.Value(), rec.Topic(), rec.Partition())
+	}
 	if strings.Contains(et.Type, "Key") {
 		key := et.getJSON(rec.Key())
 		if key == nil {
@@ -58,6 +61,9 @@ func (et ExtractTopic) getJSON(value interface{}) interface{} {
 	if val == nil && et.SkipMissingOrNull {
 		log.Error(log.WithPrefix(extractTopicLogPrefix, fmt.Sprintf("selected field: %v key is null, reset to old topic key", et.Field)))
 		return nil
+	}
+	if val == nil {
+		return value
 	}
 	return et.Field
 }
