@@ -143,9 +143,3 @@ The framework supports **plugins and registry** for extending functionality:
 ## 📜 License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-✅ Now the README emphasizes **Kafka Connect REST API configs** directly, instead of tying things to a `config.yaml` file.
-
-Do you also want me to create a **sample plugin implementation** (e.g., a simple FileSink connector in Go) so new users see exactly how to write and load a connector?
